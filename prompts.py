@@ -48,27 +48,6 @@ Google Search Results: {google_results}
 
 Please analyze these Google results and extract the key insights that help answer the question."""
 
-    @staticmethod
-    def bing_analysis_system() -> str:
-        """System prompt for analyzing Bing search results."""
-        return """You are an expert research analyst. Analyze the provided Bing search results to extract complementary insights that answer the user's question.
-
-Focus on:
-- Additional perspectives not covered in other sources
-- Technical details and documentation
-- News articles and recent developments
-- Microsoft ecosystem and enterprise perspectives
-
-Provide a concise analysis highlighting unique findings and perspectives."""
-
-    @staticmethod
-    def bing_analysis_user(user_question: str, bing_results: str) -> str:
-        """User prompt for analyzing Bing search results."""
-        return f"""Question: {user_question}
-
-Bing Search Results: {bing_results}
-
-Please analyze these Bing results and extract insights that complement other search sources."""
 
     @staticmethod
     def reddit_analysis_system() -> str:
@@ -104,11 +83,11 @@ Please analyze this Reddit content and extract community insights, user experien
         return """You are an expert research synthesizer. Combine the provided analyses from different sources to create a comprehensive, well-structured answer.
 
 Your task:
-- Synthesize insights from Google, Bing, and Reddit analyses
+- Synthesize insights from Google and Reddit analyses
 - Identify common themes and conflicting information
 - Present a balanced view incorporating different perspectives
 - Structure the response logically with clear sections
-- Cite the source type (Google, Bing, Reddit) for key claims
+- Cite the source type (Google, Reddit) for key claims
 - Highlight any contradictions or uncertainties
 
 Create a comprehensive answer that addresses the user's question from multiple angles."""
@@ -117,15 +96,12 @@ Create a comprehensive answer that addresses the user's question from multiple a
     def synthesis_user(
         user_question: str,
         google_analysis: str,
-        bing_analysis: str,
         reddit_analysis: str,
     ) -> str:
         """User prompt for synthesizing all analyses."""
         return f"""Question: {user_question}
 
 Google Analysis: {google_analysis}
-
-Bing Analysis: {bing_analysis}
 
 Reddit Community Analysis: {reddit_analysis}
 
@@ -170,16 +146,6 @@ def get_google_analysis_messages(
     )
 
 
-def get_bing_analysis_messages(
-    user_question: str, bing_results: str
-) -> list[Dict[str, Any]]:
-    """Get messages for Bing results analysis."""
-    return create_message_pair(
-        PromptTemplates.bing_analysis_system(),
-        PromptTemplates.bing_analysis_user(user_question, bing_results),
-    )
-
-
 def get_reddit_analysis_messages(
     user_question: str, reddit_results: str, reddit_post_data: list
 ) -> list[Dict[str, Any]]:
@@ -193,12 +159,12 @@ def get_reddit_analysis_messages(
 
 
 def get_synthesis_messages(
-    user_question: str, google_analysis: str, bing_analysis: str, reddit_analysis: str
+    user_question: str, google_analysis: str, reddit_analysis: str
 ) -> list[Dict[str, Any]]:
     """Get messages for final synthesis."""
     return create_message_pair(
         PromptTemplates.synthesis_system(),
         PromptTemplates.synthesis_user(
-            user_question, google_analysis, bing_analysis, reddit_analysis
+            user_question, google_analysis, reddit_analysis
         ),
     )

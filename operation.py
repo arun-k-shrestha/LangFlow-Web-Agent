@@ -70,7 +70,7 @@ def _reddit_snapshot(trigger_url,params,data,operation_name ="operation"):
     raw_data = download_snapshot(snapshot_id)
     return raw_data
 
-def reddit_search_api(keyword,date="All time", sort_by="Hot",num_posts=75):
+def reddit_search_api(keyword,date="All time", sort_by="Hot",num_posts=20):
     trigger_url = "https://api.brightdata.com/datasets/v3/trigger"
     params ={
         "dataset_id": "gd_lvz8ah06191smkebj4",
@@ -105,7 +105,7 @@ def reddit_search_api(keyword,date="All time", sort_by="Hot",num_posts=75):
     return {"parsed_data": parsed_data, "total_posts": len(parsed_data)}
 
 
-def reddit_post_retrieval(urls, days_back=30,load_all_comments=False,comment_limit=""):
+def reddit_post_retrieval(urls, days_back=10,load_all_comments=False,comment_limit=""):
     if not urls:
         return None
     trigger_url = "https://api.brightdata.com/datasets/v3/trigger"
@@ -119,8 +119,24 @@ def reddit_post_retrieval(urls, days_back=30,load_all_comments=False,comment_lim
         {
             "url": url,
             "days_back": days_back,
-            "load_all_comments": load_all_comments,
+            "load_all_replies": load_all_comments,
             "comment_limit": comment_limit
         }
         for url in urls
     ]
+
+    raw_data = _reddit_snapshot(trigger_url,params,data,operation_name="reddit_post_retrieval")
+
+    if not raw_data:
+        return None
+    
+    parsed_comments =[]
+    for comment in raw_data:
+        parsed_comment ={
+            "comment_id":comment.get("comment_id"),
+            "content": comment.get("comment"),
+            "date": comment.get("date_posted"),
+        }
+        parsed_comments.append(parsed_comment)
+
+    return {"parsed_comments": parsed_comments, "total_comments": len(parsed_comments)}
